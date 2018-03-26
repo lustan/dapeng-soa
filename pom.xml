@@ -67,6 +67,7 @@
         <!--<module>dapeng-demo</module>-->
         <module>dapeng-monitor-filter</module>
         <module>dapeng-counter</module>
+        <module>dapeng-command-tool</module>
     </modules>
 
     <properties>
