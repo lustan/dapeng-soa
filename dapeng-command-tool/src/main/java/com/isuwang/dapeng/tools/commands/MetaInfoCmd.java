@@ -31,7 +31,7 @@ public class MetaInfoCmd implements Command {
 
             @Override
             public String getUsage() {
-                return "metadata com.isuwang.soa.hello.service.HelloService 1.0.1";
+                return "metadata com.isuwang.soa.hello.service.HelloService 1.0.0";
             }
 
             @Override
