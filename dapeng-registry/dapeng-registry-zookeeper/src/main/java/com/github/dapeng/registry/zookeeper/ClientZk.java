@@ -160,8 +160,8 @@ public class ClientZk extends CommonZk {
 
 
             //获得服务  service instances和 config
-            getConfigData(zkInfo.service);
-            zkInfo.setRuntimeInstances(runInstancesMap.get(zkInfo.service));
+
+            zkInfo.setRuntimeInstances(getConfigData(zkInfo.service).getRuntimeInstanceList());
             /*List<RuntimeInstance> runtimeInstanceList = zkInfo.getRuntimeInstances();
             LOGGER.info(getClass().getSimpleName() + "::syncServiceZkInfo[" + zkInfo.service + "], 获取{}的子节点成功", servicePath);
             //child = 10.168.13.96:9085:1.0.0

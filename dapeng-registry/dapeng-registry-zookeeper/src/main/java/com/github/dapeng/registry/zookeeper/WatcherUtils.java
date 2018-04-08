@@ -1,6 +1,5 @@
 package com.github.dapeng.registry.zookeeper;
 
-import com.github.dapeng.registry.*;
 import com.github.dapeng.registry.ConfigKey;
 import com.github.dapeng.registry.ServiceInfo;
 import org.slf4j.Logger;
@@ -89,8 +88,18 @@ public class WatcherUtils {
             String[] properties = configData.split(";");
 
             for (String property : properties) {
-                String typeValue = property.split("/")[0];
-                if (typeValue.equals(ConfigKey.TimeOut.getValue())) {
+                String[] config;
+                if(property.contains(":")){
+                    config =  property.split(":");
+                }else{
+                    config =  property.split("/");
+                }
+                if(ConfigKey.getConfigKeyByCodeValue(config[0]) != null){
+                    zkInfo.getConfigMap().put(ConfigKey.getConfigKeyByCodeValue(config[0]) ,config[1]);
+                }else {
+                    LOGGER.info("在ConfigKey中沒有找到对应的配置{}",config[0]);
+                }
+              /*  if (typeValue.equals(ConfigKey.TimeOut.getValue())) {
                     if (isGlobal) {
                         String value = property.split("/")[1];
                         zkInfo.timeConfig.globalConfig = timeHelper(value);
@@ -125,7 +134,7 @@ public class WatcherUtils {
                             zkInfo.loadbalanceConfig.serviceConfigs.put(props[0], LoadBalanceStrategy.findByValue(props[1]));
                         }
                     }
-                }
+                }*/
             }
             LOGGER.info("get config form {} with data [{}]");
         } catch (UnsupportedEncodingException e) {

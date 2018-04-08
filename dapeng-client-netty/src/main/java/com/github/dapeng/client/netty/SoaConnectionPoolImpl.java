@@ -1,14 +1,11 @@
 package com.github.dapeng.client.netty;
 
-import com.github.dapeng.api.ContainerFactory;
 import com.github.dapeng.core.*;
-import com.github.dapeng.json.JsonSerializer;
 import com.github.dapeng.registry.ConfigKey;
 import com.github.dapeng.registry.LoadBalanceStrategy;
 import com.github.dapeng.registry.RuntimeInstance;
 import com.github.dapeng.registry.zookeeper.*;
 import com.github.dapeng.util.SoaSystemEnvProperties;
-import org.apache.zookeeper.Op;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,22 +201,16 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
     private RuntimeInstance loadBalance(String serviceName, String version, String methodName, List<RuntimeInstance> compatibles) {
 
         ZkConfigInfo configInfo = zkAgent.getConfig(false, serviceName);
-        //方法级别
+      /*  //方法级别
         LoadBalanceStrategy methodLB = configInfo.loadbalanceConfig.serviceConfigs.get(methodName);
         //服务配置
         LoadBalanceStrategy serviceLB = configInfo.loadbalanceConfig.serviceConfigs.get(ConfigKey.LoadBalance.getValue());
         //全局
-        LoadBalanceStrategy globalLB = configInfo.loadbalanceConfig.globalConfig;
+        LoadBalanceStrategy globalLB = configInfo.loadbalanceConfig.globalConfig;*/
 
-        LoadBalanceStrategy balance;
+        LoadBalanceStrategy balance = LoadBalanceStrategy.findByValue(configInfo.getConfigMap().get(ConfigKey.LoadBalance));
 
-        if (methodLB != null) {
-            balance = methodLB;
-        } else if (serviceLB != null) {
-            balance = serviceLB;
-        } else if (globalLB != null) {
-            balance = globalLB;
-        } else {
+        if (balance == null){
             balance = LoadBalanceStrategy.Random;
         }
 
@@ -338,7 +329,8 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
      */
     private Optional<Long> getZkTimeout(String serviceName, String version, String methodName) {
         ZkConfigInfo configInfo = zkAgent.getConfig(false, serviceName);
-        //方法级别
+        String globalTimeOut = configInfo.getConfigMap().get(ConfigKey.TimeOut);
+      /*  //方法级别
         Long methodTimeOut = configInfo.timeConfig.serviceConfigs.get(methodName);
         //服务配置
         Long serviceTimeOut = configInfo.timeConfig.serviceConfigs.get(ConfigKey.TimeOut.getValue());
@@ -358,6 +350,11 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
         } else if (globalTimeOut != null) {
 
             return Optional.of(globalTimeOut);
+        } else {
+            return Optional.empty();
+        }*/
+        if (globalTimeOut != null) {
+            return Optional.of(WatcherUtils.timeHelper(globalTimeOut));
         } else {
             return Optional.empty();
         }

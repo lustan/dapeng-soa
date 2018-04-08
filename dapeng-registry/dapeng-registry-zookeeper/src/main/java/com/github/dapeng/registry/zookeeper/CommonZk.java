@@ -37,7 +37,7 @@ public class CommonZk {
      * zk 配置 缓存 ，根据 serivceName + versionName 作为 key
      */
     protected ConcurrentMap<String, ZkConfigInfo> zkConfigMap = new ConcurrentHashMap();
-    protected ConcurrentMap<String, List<RuntimeInstance>> runInstancesMap = new ConcurrentHashMap();
+   // protected ConcurrentMap<String, List<RuntimeInstance>> runInstancesMap = new ConcurrentHashMap();
 
     /**
      * 获取zk 配置信息，封装到 ZkConfigInfo
@@ -59,7 +59,7 @@ public class CommonZk {
 
                 if (watchedEvent.getType() == Watcher.Event.EventType.NodeDataChanged) {
                     logger.info(watchedEvent.getPath() + "'s data changed, reset config in memory");
-                    zkConfigMap.clear();
+                    configInfo.getConfigMap().clear();
                     getConfigData(serviceName);
                 }
             }, null);
@@ -79,8 +79,7 @@ public class CommonZk {
             byte[] serviceData = zk.getData(configPath, watchedEvent -> {
                 if (watchedEvent.getType() == Watcher.Event.EventType.NodeDataChanged) {
                     logger.info(watchedEvent.getPath() + "'s data changed, reset zkConfigMap in memory");
-                    zkConfigMap.clear();
-
+                    configInfo.getConfigMap().clear();
                     getConfigData(serviceName);
                 }
             }, null);
@@ -94,15 +93,8 @@ public class CommonZk {
             logger.error(e.getMessage(), e);
         }
 
-        zkConfigMap.put(serviceName, configInfo);
-
-        //获得 服务实例列表
-        List<RuntimeInstance> runtimeInstanceList = runInstancesMap.get(serviceName);
-        if (runtimeInstanceList != null && !runtimeInstanceList.isEmpty()) {
-            logger.info(getClass().getSimpleName() + "::getConfigData[" + serviceName + "]: 运行实例信息[service instances]已经初始化完成");
-        }else{
             // 拉取服务实例信息
-            runtimeInstanceList = new ArrayList<RuntimeInstance>();
+        List<RuntimeInstance> runtimeInstanceList = new ArrayList<RuntimeInstance>();
             String servicePath = SERVICE_PATH + "/" + serviceName;
             List<String> childrens = new ArrayList<String>();
             try {
@@ -130,8 +122,10 @@ public class CommonZk {
                     runtimeInstanceList.add(instance);
                 }
             }
-            runInstancesMap.put(serviceName,runtimeInstanceList);
-        }
+            logger.info(getClass().getSimpleName() + "::getConfigData[" + serviceName + "]: 运行实例信息[service instances]已经初始化完成");
+        configInfo.setRuntimeInstanceList(runtimeInstanceList);
+
+        zkConfigMap.put(serviceName, configInfo);
         return configInfo;
     }
 

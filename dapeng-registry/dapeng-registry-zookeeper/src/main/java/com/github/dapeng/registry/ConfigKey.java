@@ -6,20 +6,15 @@ package com.github.dapeng.registry;
 public enum ConfigKey {
 
     Thread("thread"),
-
     ThreadPool("threadPool"),
-
     ClientTimeout("clientTimeout"),
-
     ServerTimeout("serverTimeout"),
-
     LoadBalance("loadBalance"),
-
     FailOver("failover"),
-
     Compatible("compatible"),
-
-    TimeOut("timeout");
+    TimeOut("timeout"),
+    CreateSupplier("createSupplier"),
+   ModifySupplier("modifySupplier");
 
     private final String value;
 
@@ -31,7 +26,7 @@ public enum ConfigKey {
         return this.value;
     }
 
-    public static ConfigKey findByValue(String value) {
+    /*public static ConfigKey findByValue(String value) {
         switch (value) {
             case "thread":
                 return Thread;
@@ -50,5 +45,15 @@ public enum ConfigKey {
             default:
                 return null;
         }
+    }*/
+
+    //根据枚举值 取得枚举对象
+    public static ConfigKey getConfigKeyByCodeValue(String value){
+        for(ConfigKey configKey : ConfigKey.values()){
+            if(value.equals(configKey.value)){
+                return configKey;
+            }
+        }
+        return null;
     }
 }

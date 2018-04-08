@@ -10,6 +10,7 @@ import com.github.dapeng.impl.filters.HeadFilter;
 import com.github.dapeng.org.apache.thrift.TException;
 import com.github.dapeng.registry.ConfigKey;
 import com.github.dapeng.registry.RegistryAgentProxy;
+import com.github.dapeng.registry.zookeeper.WatcherUtils;
 import com.github.dapeng.registry.zookeeper.ZkConfigInfo;
 import com.github.dapeng.util.DumpUtil;
 import com.github.dapeng.util.ExceptionUtil;
@@ -17,6 +18,7 @@ import com.github.dapeng.util.SoaSystemEnvProperties;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -284,12 +286,13 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
         long envTimeout = SoaSystemEnvProperties.SOA_SERVICE_TIMEOUT;
         if (null != configInfo) {
-            //方法级别
+          /*  //方法级别
             Long methodTimeOut = configInfo.timeConfig.serviceConfigs.get(soaHeader.getMethodName());
             //服务配置
             Long serviceTimeOut = configInfo.timeConfig.serviceConfigs.get(ConfigKey.TimeOut.getValue());
             //全局
             Long globalTimeOut = configInfo.timeConfig.globalConfig;
+
 
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug(getClass().getSimpleName() + "::getTimeout request:serviceName:{},methodName:{}," +
@@ -309,7 +312,21 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                 timeoutConfig = globalTimeOut;
             } else {
                 timeoutConfig = null;
+            }*/
+
+
+          // 先获得service或者全局配置
+          Long timeoutConfig = WatcherUtils.timeHelper(configInfo.getConfigMap().get(ConfigKey.TimeOut));
+
+
+          //是否有分方法级配置  如果有就采用 方法级别的配置
+            if(ConfigKey.getConfigKeyByCodeValue(soaHeader.getMethodName()) != null){
+                String fun_config = configInfo.getConfigMap().get(ConfigKey.getConfigKeyByCodeValue(soaHeader.getMethodName()));
+                if(!StringUtils.isBlank(fun_config)){
+                    timeoutConfig = WatcherUtils.timeHelper(fun_config);
+                }
             }
+
 
             timeout = (timeoutConfig != null) ? timeoutConfig.longValue() : envTimeout;
         }
